@@ -1,0 +1,18 @@
+{
+    "MedicalDatasetFile": "file:///C:/Users/nikhilj/Downloads/RPA_ML/ML/Emids-Chatbot/ChatBot_Backend/datasets/FAQDataset_Greenway.csv",
+    "WelcomeMessage": "Bot: Hi, Welcome to our Health System How can i help You!",
+    "ColumnNames":["Question","Answer","Class"],
+	"CorpusData":"C:/Users/nikhilj/Downloads/RPA_ML/ML/Emids-Chatbot/ChatBot_Backend/datasets/english",
+	"Threshold":0.5,
+	"QuitMessage":"PRESS Q to QUIT",
+	"EndConversation":["It was good to be of help.","Thank you for talking with me have a nice day","bye bye See you some other time","It was my pleasure talking with you See ya"],
+	"ThresholdNegativeResponse":"Can you please ask the relevant Questions as I am designed in a closed domain mode : Thank You",
+	"UserSatisfiedInput":"Please let me know if you got all your answers perfectly in y/n \n",
+	"UserNotSatisfiedResponse":"It feels bad to hear that, i am in a training mode i will soon be trained to give you the answer you need \n",
+	"TrainingStart":"Can you help me training if you have the answer to the questions i gave wrong y/n ?\n",
+	"TrainingStartMessage":"Awesome we will start the training",
+	"QuestionInput":"Please write the question \n",
+	"AnswerInput":"Please write the answer  \n",
+	"CategoryInput":"What is the category General/Medical \n",
+	"OutputCsvPath":"C:/Users/nikhilj/Downloads/RPA_ML/ML/Emids-Chatbot/ChatBot_Backend/datasets/output/output.csv"
+}
