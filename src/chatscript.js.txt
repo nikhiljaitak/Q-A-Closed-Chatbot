@@ -1,0 +1,178 @@
+var me = {};
+me.avatar = "src/av3.jpg";
+
+var you = {};
+you.avatar = "src/av11.jpg";
+
+function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
+}            
+
+//-- No use time. It is a javaScript effect.
+function insertChat(who, text, time){
+    if (time === undefined){
+        time = 0;
+    }
+    var control = "";
+    var date = formatAMPM(new Date());
+    
+    if (who == "me"){
+        control = '<li style="width:100%">' +
+                        '<div class="msj macro">' +
+                        '<div class="avatar" style="padding:0px 0px 0px 0px !important"><img class="img-circle" style="width:20%;" src="'+ me.avatar +'" /></div>' +
+                            '<div class="text text-l">' +
+                                '<p>'+ text +'</p>' +
+                                '<p><small>'+date+'</small></p>' +
+                            '</div>' +
+                        '</div>' +
+                    '</li>';                    
+    }else{
+        control = '<li style="width:100%;">' +
+                        '<div class="msj-rta macro">' +
+                            '<div class="text text-r">' +
+                                '<p>'+text+'</p>' +
+                                '<p><small>'+date+'</small></p>' +
+                            '</div>' +
+                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:30%;" src="'+you.avatar+'" /></div>' +                                
+                  '</li>';
+    }
+    setTimeout(
+        function(){                        
+            $("ul").append(control).scrollTop($("ul").prop('scrollHeight'));
+        }, time);
+    
+}
+
+function resetChat(){
+    $("ul").empty();
+}
+
+// $(".mytext").on("keydown", function(e){
+    // if (e.which == 13){
+        // var text = $(this).val();
+        // if (text !== ""){
+            // insertChat("me", text);              
+            // $(this).val('');
+        // }
+    // }
+// });
+
+
+
+
+$('body > div > div > div:nth-child(2) > span').click(function(){
+    $(".mytext").trigger({type: 'keydown', which: 13, keyCode: 13});
+})
+
+//-- Clear Chat
+resetChat();
+
+//-- Print Messages
+	  insertChat("you", "Hi, I am Amalea, How can I help you?", 1500);  
+// // insertChat("you", "Hi, Pablo", 1500);
+// // insertChat("me", "What would you like to talk about today?", 3500);
+// // insertChat("you", "Tell me a joke",7000);
+// // insertChat("me", "Spaceman: Computer! Computer! Do we bring battery?!", 9500);
+// // insertChat("you", "LOL", 12000);
+
+
+        var endPoint = "http://localhost:5000/getResponse?query=";
+
+        function getResponse() {
+            var query = $('#mytext1').val().trim();
+			if(query != "")
+			{
+				var url = endPoint + query;
+
+
+				// $('.chat-area').append('<br /> You: ' + query + '<br />');
+				$('#mytext1').val('');
+				insertChat("me", query, 0);   
+
+				$('#btnSend').attr('disabled', 'disabled');
+
+				$.getJSON(url, function (luisResponse) {
+					// $('#txtJSONResponse').val(JSON.stringify(luisResponse));
+					//parse JSON response
+					ProcessResponse(luisResponse);
+
+					$('#btnSend').removeAttr('disabled');
+					//$('#txtQuery').val('');
+				})
+			}
+        }
+
+        function ProcessResponse(responseJSON) {
+            //var intent = responseJSON.intents[0].intent;
+            var maxProbababilityResponse = responseJSON.response;
+            var responseText = maxProbababilityResponse;
+/*
+            switch (intent) {
+                case 'None':
+                    responseText = 'Sorry, I didn\'t understand your query. Could you please rephrase or type your complete question?';
+                    break;
+                case 'III_Fax_Field_Indication':
+                    responseText = 'If the III Fax indicator is selected for a pharmacy displayed under Previously Selected Pharmacies or Pharmacy Search on the Pharmacy Search dialog, the pharmacy can accept prescriptions for Schedule III drugs via fax, provided the facsimile meet all applicable federal and state regulations.  Electronic prescriptions of Schedule III-V drugs do not meet federal regulation.  In some cases, a facsimile copy of a manually signed prescription can meet federal regulations.  State regulations can be more rigorous than federal regulations.';
+                    break;
+                case 'Eprescribe_DrFirst_Info':
+                    responseText = 'You will find DrFirst Help information in two locations from the ePrescribe menu. Select Help from the Help / Contact Us option on the PrimeSuite-ePrescribe menu bar at the top of the dialog to view the Rcopia E-Prescribing Help Interface.Find DrFirst/Rcopia Frequently Asked Questions under Additional Options on the PrimeSuite-ePrescribe menu bar at the top of the dialog.';
+                    break;
+				case 'Send_Prescription_For_III_Drug':
+				responseText = 'No. Prescriptions for Schedule III through Schedule V drugs cannot be sent as electronic transactions.  These prescriptions are required by federal law to be printed and signed manually.  State regulations vary and can be more rigorous than federal regulations.  In most cases, prescriptions for Schedule III, IV and V drugs must be handed directly to the patient.  If the pharmacy is set up to receive Schedule III faxes, the printed, manually signed prescription can be faxed.';
+					break;
+				case 'PharmacyList_For_Geographic_Area':
+				responseText = 'To find out which pharmacies in your area participate in electronic prescription interchange, follow these steps:Navigate to the Pharmacy-Physician Search page on the SureScripts website: http://www.surescripts.com/pharmacy-physician-search.aspx .Select the Pharmacy option.Select your State and City or enter your Zip Code and select the number of miles for the Search within option to retrieve a list of participating pharmacies that meet your selection criteria.The pharmacies on the list you retrieve participate in exchange of electronic prescriptions and renewal requests.  If some of the pharmacies in your area with whom you work frequently are not listed, you can still use PrimeSuite-ePrescribe to seamlessly submit prescriptions via fax.When your patient Preferred Pharmacy does not accept electronic transmissions, ePrescribe converts the prescription data to automatically generate a fax prescription.  You do not have to remember which pharmacies work from fax and which accept direct eRx transmission.';
+					break;
+				case 'Manually_Add_Pharmacy_Listing':
+				responseText = 'The simple answer is Yes.  You can add to the Pharmacy Listing manually; however, this is not the preferred method for adding pharmacies if you are using Prime Suite-ePrescribe functionality.  A manually added pharmacy cannot be used for an electronic prescription.  When you manually add a pharmacy, the pharmacy information cannot be transmitted to DrFirst because the manually entered pharmacy does not have a pharmacy ID associated with it.  If a previous electronic prescription for the patient has been sent, DrFirst will still have that prescription\'s pharmacy associated with the patient.  The manually entered pharmacy will not update that entry because it lacks a pharmacy ID to associate it with the electronic pharmacy listing.  A pharmacy that is not on the PrimeSuite Pharmacy Listing can be selected in DrFirst and associated with the patient.  When the response from DrFirst is returned to PrimeSuite, the pharmacy selected in DrFirst will be added to the PrimeSuite Pharmacy Listing, though it will not be associated with the patient.  You must associate the new pharmacy with the patient on the patients next visit .  Unless the pharmacy is very new, you should find it using the Pharmacy Search function.';
+					break;
+				case 'Missing_eRx_Icon':
+				responseText = 'You must have the User Right Access ePrescribe for the ePrescribe (eRx) icon to appear to the right of the Help menu on the Standard Page Header in PrimeSuite.  Ask your System Administrator to grant you the Access ePrescribe right.';
+					break;
+				case 'Import_Pharmacy_Listing_without_eRx':
+				responseText = 'Yes. You can import a Pharmacy Listing whether or not you are using Prime Suite-ePrescribe (eRx).  The Preferred Pharmacy field in Registration Information allows you to access, search for, and select a Preferred Pharmacy from the Pharmacy Listing if you have imported a Pharmacy Listing.  A Patient\'s preferred Pharmacy Name and Fax Number will display on the Medications dialog if a Preferred Pharmacy has been selected on Registration Information.  The fields Preferred Pharmacy, Pharmacy Phone, Pharmacy Fax, and Pharmacy Address are available for display on the Patient Info overlay as well.  The Preferred Pharmacy fields on the Medications dialog in Patient Chart and on the Patient Info overlay can be used with manually entered pharmacies as well as those selected from imported Pharmacy Listings';
+					break;
+				case 'Import_Pharmacy_Listing_from_library':
+				responseText = 'To Import a Pharmacy Listing from the Greenway Library, follow these steps:From the PrimeSuite Reports menu, select Report Designer.On the Report Designer page, select Import from the black Action bar to the left of the main panel.The Greenway Library Import dialog opens. In the Greenway Library Import dialog, browse to the desired Pharmacy Listing by selecting Pharmacies > Pharmacy Listings > Pharmacy State under the Browse Greenway Library (default) option. Select the desired state\'s listing.';
+					break;
+				case 'Add_Pharmacy':
+				responseText = 'No.  At the present time, you can only enter a single pharmacy as the Patient\'s Preferred Pharmacy on Registration Information to be displayed on the Medications dialog and in the Patient Info overlay. ';
+					break;
+				case 'Error_SSO_305':
+				responseText = 'The complete error message is "We are sorry, but the system could not process your request.  Please report condition SSO-305. If you receive this message when attempting to access ePrescribe, your PrimeSuite Username is not a registered DrFirst user or there is a problem with the mapping of your Username to DrFirst Registration information.  Contact Greenway Customer Support to assist you with resolving the problem."';
+					break;
+				case 'Pharmacy_Search':
+				responseText = 'You can use any of the following methods in the PrimeSuite Pharmacy Search (from Registration Information field Preferred Pharmacy): Phone or Fax number: If you use this method, you must enter the phone number in the exact format used in the system or you will not return a match even when the phone number entered is identical except for formatting. The format is (###) ###-####.  For example, use (770) 836-3100, not 770-836-3100. Pharmacy Name if you are searching for a pharmacy associated with a pharmaceutical corporation; use the corporate name rather than the local name for best results.  For example, use CVS, not Corner Drugs. If you are seeking the listing for an independent pharmacy named for a family, try searching for the name with no apostrophe.  For example, use Smith, not Smith\'s.  You can also execute a wild-card search in this field.  To do so, enter the first few letters of the pharmacy sought.  For example, enter Wal to return all pharmacies with names beginning with "Wal," including Wal-Mart, Walgreens, etc. State, City and/or Zip Code. If you enter a value in any of these fields (or a combination of fields), all pharmacies within the geographical area specified are returned.  For example, if you enter Georgia in the State field, all Georgia pharmacies are returned.  If you enter Carrollton in the City field and Georgia in the State field, all pharmacies in Carrollton, Georgia, are returned.  If you enter 30117 in the Zip Code field, all pharmacies in the 30117 Zip Code are returned. Back to Top ';
+					break;
+				case 'ERx_Prescriptions_Pending':
+				responseText = 'You access and work Pending prescriptions using the Prescription Report in ePrescribe.  When you click the eRx icon to open ePrescribe, Renewal Requests are loaded by default.  To access your Pending Prescriptions, run the Prescription Report with the Status set to Pending.Follow these steps:Click the eRx icon to the right of the Help menu on the Standard Page Header in PrimeSuite to open ePrescribe.Select the Prescription Report option from the ePrescribe menu at the top of the page.In the Prescription Report section: Select the appropriate Provider, Patient, and Status criteria.Click the Display Report button.You can now work the Pending prescriptions from the displayed list.  For more information on how to work Pending prescriptions, see DrFirst/Rcopia Help.  Select Help from the Help / Contact Us option on the PrimeSuite-ePrescribe menu bar at the top of the dialog.  See Pending Prescriptions under Help Topics on the Rcopia™ E-Prescribing Help Interface.';
+					break;
+				case 'Correct_Preferred_Pharmacy':
+				responseText = 'You cannot currently delete a Preferred Pharmacy from Registration Information for a patient once it is associated with the patient; however, you can replace it. If you know the correct pharmacy to replace the incorrect value in Preferred Pharmacy, simply Search and Select the new pharmacy. If you do not know the correct pharmacy, you can create a dummy entry named Unknown or Pharmacy Needed as a reminder to update the Preferred Pharmacy on the patient\s next visit.REMEMBER: Manually added pharmacies such as this dummy entry are not sent to DrFirst to create the electronic prescription.  They can be identified easily; each manual entry has an asterisk (*) to the right of the pharmacy name.  If the incorrect pharmacy was sent to DrFirst as part of an electronic prescription, it is still associated with the patient in DrFirst.  DrFirst requires a pharmacy be associated with each patient, so the incorrect value cannot be removed until a valid electronically generated pharmacy listing replaces it.  You must enter a valid Preferred Pharmacy in PrimeSuite prior to the next electronic prescription creation.';
+					break;
+				case 'Cancel_Prescription_Sent_Error':
+					responseText = 'To cancel a prescription sent in error or a prescription containing an error, follow these steps: Select Open ePrescribe from the Action bar to the left of the main panel in Patient Charts.Select the Prescription Report option from the ePrescribe menu at the top of the page.In the Prescription Report section:Select the appropriate Provider, Patient, Status , and Completed criteria to return the prescription in question.Click the Display Report button.Locate the prescription sent in error and click the Void Action to the right of the line item.A fax will be sent to notify the pharmacy of the voided prescription.'; 
+					break;
+				case 'DrFirst_Get_Pharmacy_Into_PrimeSuite':
+					responseText = 'To import a pharmacy entry from DrFirst and add it to your PrimeSuite-ePrescribe Pharmacy Listing, simply select the pharmacy in DrFirst, attach to the Patient and send the prescription.  When the prescription has been sent and the electronic response is received by ePrescribe, the pharmacy will be added to your Pharmacy Listing in PrimeSuite. The pharmacy will not be associated with the patient as the Preferred Pharmacy, however.  You will need to associate the pharmacy with the patient as the Preferred Pharmacy on Registration Information during the patient\'s next visit.'; 
+					break;
+				case 'Pharmacy_States_Receive_Prescription':
+					responseText = 'If the pharmacy says they did not receive the prescription, you should first run the Prescription Report in DrFirst (ePrescribe) to check the Status.  To do so, follow these steps:Select Open ePrescribe from the Action bar to the left of the main panel in Patient Charts.Select the Prescription Report option from the ePrescribe menu at the top of the page.In the Prescription Report section:Select appropriate Provider, Patient, Status, and Completed criteria to display the prescription in question.Click Display Report.After the report processes, find the prescription in question on the returned list and verify the Status.If the prescription is Pending, have the appropriate Provider sign and send.If the Status is Sent, verify that the pharmacy has not received the electronic prescription and ask them to check their fax (some prescriptions default to fax).  If the pharmacy finds the prescription in neither received electronic submissions nor faxes, make a note of the prescription Serial# from the report and contact the Greenway Customer Support department to have them track the status of the prescription.'; 
+					break; 
+            }
+*/
+            if (responseText) {
+				insertChat("you", responseText, 0);
+            }
+        }        
+
+        
+
+//-- NOTE: No use time on insertChat.	
